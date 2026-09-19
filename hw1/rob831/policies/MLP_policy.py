@@ -75,17 +75,14 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     ##################################
 
     def get_action(self, obs: np.ndarray) -> np.ndarray:
-        if len(obs.shape) > 1:
-            observation = obs
-        else:
-            observation = obs[None]
-
-        # TODO return the action that the policy prescribes
-        raise NotImplementedError
+        observation = obs if len(obs.shape) > 1 else obs[None]
+        observation = ptu.from_numpy(observation)
+        action_distribution = self(observation)
+        return ptu.to_numpy(action_distribution.sample())
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError        
 
     # This function defines the forward pass of the network.
     # You can return anything you want, but you should be able to differentiate
@@ -93,7 +90,15 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
     def forward(self, observation: torch.FloatTensor) -> Any:
-        raise NotImplementedError
+        if self.discrete:
+            logits = self.logits_na(observation)
+            return distributions.Categorical(logits=logits)
+        else:
+            batch_mean = self.mean_net(observation)
+            batch_dim = batch_mean.shape[0]
+            scale_tril = torch.diag(torch.exp(self.logstd))
+            batch_scale_tril = scale_tril.repeat(batch_dim, 1, 1)
+            return distributions.MultivariateNormal(batch_mean, scale_tril=batch_scale_tril)
 
 
 #####################################################
@@ -108,8 +113,17 @@ class MLPPolicySL(MLPPolicy):
             self, observations, actions,
             adv_n=None, acs_labels_na=None, qvals=None
     ):
-        # TODO: update the policy and return the loss
-        loss = TODO
+        observations = ptu.from_numpy(observations)
+        actions = ptu.from_numpy(actions)
+
+        self.optimizer.zero_grad()
+
+        action_distribution = self(observations)
+
+        loss = self.loss(actions, action_distribution)
+
+        loss.backward()
+        self.optimizer.step()
 
         return {
             # You can add extra logging information here, but keep this line
