@@ -78,7 +78,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         observation = obs if len(obs.shape) > 1 else obs[None]
         observation = ptu.from_numpy(observation)
         action_distribution = self(observation)
-        return ptu.to_numpy(action_distribution.sample())
+        return ptu.to_numpy(action_distribution.mean())
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
