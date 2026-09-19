@@ -120,7 +120,7 @@ class MLPPolicySL(MLPPolicy):
 
         action_distribution = self(observations)
 
-        loss = self.loss(actions, action_distribution)
+        loss = self.loss(action_distribution.mean, actions)
 
         loss.backward()
         self.optimizer.step()
