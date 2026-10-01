@@ -141,8 +141,6 @@ class MLPPolicyPG(MLPPolicy):
 
         pi = self.forward(observations)
         log_prob = pi.log_prob(actions)
-        if not self.discrete:
-            log_prob = log_prob.sum(dim = -1)
 
         policy_loss = -(log_prob * advantages).mean()
 
@@ -151,7 +149,7 @@ class MLPPolicyPG(MLPPolicy):
         self.optimizer.step()
 
         if self.nn_baseline:
-            ## TODO: update the neural network baseline using the q_values as
+            ## : update the neural network baseline using the q_values as
             ## targets. The q_values should first be normalized to have a mean
             ## of zero and a standard deviation of one.
 
