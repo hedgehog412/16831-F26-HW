@@ -195,7 +195,7 @@ class PGAgent(BaseAgent):
 
         sum = 0
         for t in reversed(range(len(rewards))):
-            sum += rewards[t] + self.gamma * sum
+            sum = rewards[t] + self.gamma * sum
             discounted_cumsums[t] = sum
 
         return discounted_cumsums
