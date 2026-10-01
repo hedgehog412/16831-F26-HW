@@ -14,11 +14,13 @@ def sample_trajectory(env, policy, max_path_length, render=False, render_mode=('
     steps = 0
     while True:
 
-        # render image of the simulated env
-        if render:
+        if render:  # feel free to ignore this for now
             if 'rgb_array' in render_mode:
-                if hasattr(env, 'sim'):
-                    image_obs.append(env.sim.render(camera_name='track', height=500, width=500)[::-1])
+                if hasattr(env.unwrapped, 'sim'):
+                    if 'track' in env.unwrapped.model.camera_names:
+                        image_obs.append(env.unwrapped.sim.render(camera_name='track', height=500, width=500)[::-1])
+                    else:
+                        image_obs.append(env.unwrapped.sim.render(height=500, width=500)[::-1])
                 else:
                     image_obs.append(env.render(mode=render_mode))
             if 'human' in render_mode:
