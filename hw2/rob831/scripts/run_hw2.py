@@ -3,6 +3,9 @@ import time
 
 from rob831.infrastructure.rl_trainer import RL_Trainer
 from rob831.agents.pg_agent import PGAgent
+import numpy as np
+if not hasattr(np, 'bool8'):
+    np.bool8 = np.bool_
 
 class PG_Trainer(object):
 
