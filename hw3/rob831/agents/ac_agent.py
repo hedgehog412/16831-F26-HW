@@ -31,7 +31,7 @@ class ACAgent(BaseAgent):
         self.replay_buffer = ReplayBuffer()
 
     def train(self, ob_no, ac_na, re_n, next_ob_no, terminal_n):
-        # TODO Implement the following pseudocode:
+        # Implement the following pseudocode:
         # for agent_params['num_critic_updates_per_agent_update'] steps,
         #     update the critic
 
@@ -39,24 +39,35 @@ class ACAgent(BaseAgent):
 
         # for agent_params['num_actor_updates_per_agent_update'] steps,
         #     update the actor
+        for i in range(self.agent_params['num_critic_updates_per_agent_update']):
+            loss_critic = self.critic.update(ob_no, ac_na, next_ob_no, re_n, terminal_n)
+
+        adv = self.estimate_advantage(ob_no, next_ob_no, re_n, terminal_n)
+
+        for i in range(self.agent_params['num_actor_updates_per_agent_update']):
+            loss_actor = self.actor.update(ob_no, ac_na, adv)
 
         loss = OrderedDict()
-        loss['Loss_Critic'] = TODO
-        loss['Loss_Actor'] = TODO
+        loss['Loss_Critic'] = loss_critic
+        loss['Loss_Actor'] = loss_actor
 
         return loss
 
     def estimate_advantage(self, ob_no, next_ob_no, re_n, terminal_n):
-        # TODO Implement the following pseudocode:
+        # Implement the following pseudocode:
         # 1) query the critic with ob_no, to get V(s)
         # 2) query the critic with next_ob_no, to get V(s')
         # 3) estimate the Q value as Q(s, a) = r(s, a) + gamma*V(s')
         # HINT: Remember to cut off the V(s') term (ie set it to 0) at terminal states (ie terminal_n=1)
         # 4) calculate advantage (adv_n) as A(s, a) = Q(s, a) - V(s)
-        adv_n = TODO
+        v_s = self.critic.forward_np(ob_no)
+        v_sp = self.critic.forward_np(next_ob_no)
+        q = re_n + self.gamma * v_sp * (1 - terminal_n)
+
+        adv_n = q - v_s
 
         if self.standardize_advantages:
-            adv_n = TODO
+            adv_n = normalize(adv_n, np.mean(adv_n), np.std(adv_n))
         return adv_n
 
     def add_to_replay_buffer(self, paths):
