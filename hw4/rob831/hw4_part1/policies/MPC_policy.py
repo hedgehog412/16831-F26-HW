@@ -38,10 +38,7 @@ class MPCPolicy(BasePolicy):
 
         print(f"Using action sampling strategy: {self.sample_strategy}")
     def sample_action_sequences(self, num_sequences, horizon, obs=None):
-        # TODO(Q1) uniformly sample trajectories and return an array of
-        # dimensions (num_sequences, horizon, self.ac_dim) in the range
-        # [self.low, self.high]
-        return random_action_sequences
+        return np.random.uniform(low=self.low, high=self.high, size=(num_sequences, horizon, self.ac_dim))
 
     def evaluate_candidate_sequences(self, candidate_action_sequences, obs):
         # TODO(Q2): for each model in ensemble, compute the predicted sum of rewards
@@ -52,7 +49,7 @@ class MPCPolicy(BasePolicy):
         for model in self.dyn_models: 
             pass
 
-        return TODO
+        return # TODO
 
     def get_action(self, obs):
         if self.data_statistics is None:
