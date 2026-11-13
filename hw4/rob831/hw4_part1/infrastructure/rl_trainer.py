@@ -191,7 +191,7 @@ class RL_Trainer(object):
         )
 
         train_video_paths = None
-        if self.logvideo:
+        if self.log_video:
             print('Collecting rollouts for video...')
             train_video_paths = utils.sample_n_trajectories(
                 self.env,
